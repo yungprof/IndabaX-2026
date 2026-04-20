@@ -1,0 +1,66 @@
+name: Retrain On Drift
+
+on:
+  workflow_dispatch:
+    inputs:
+      current_data_path:
+        description: "Current production snapshot CSV path"
+        required: false
+        default: "active_customers.csv"
+      drift_threshold:
+        description: "Fraction of drifted features required to retrain"
+        required: false
+        default: "0.25"
+  schedule:
+    - cron: "0 3 * * 1"
+
+jobs:
+  detect-and-retrain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run drift detection
+        id: drift
+        run: |
+          CURRENT_PATH="${{ github.event.inputs.current_data_path || 'active_customers.csv' }}"
+          THRESHOLD="${{ github.event.inputs.drift_threshold || '0.25' }}"
+          python monitor_drift.py \
+            --reference-csv "WA_Fn-UseC_-Telco-Customer-Churn 2.csv" \
+            --current-csv "$CURRENT_PATH" \
+            --drift-threshold "$THRESHOLD" \
+            --output-json drift_report.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("drift_report.json").read_text())
+          should_retrain = str(report.get("should_retrain", False)).lower()
+          with open(Path.cwd() / "drift_output.txt", "w", encoding="utf-8") as f:
+              f.write(f"should_retrain={should_retrain}\n")
+          print(f"Drift ratio: {report.get('overall_drift_ratio')}")
+          print(f"Should retrain: {should_retrain}")
+          PY
+          cat drift_output.txt >> "$GITHUB_OUTPUT"
+
+      - name: Retrain if drift exceeds threshold
+        if: steps.drift.outputs.should_retrain == 'true'
+        run: |
+          python train.py --data-path "WA_Fn-UseC_-Telco-Customer-Churn 2.csv"
+
+      - name: Upload drift report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-report
+          path: drift_report.json
+
