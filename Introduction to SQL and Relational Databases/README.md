@@ -45,10 +45,10 @@ The SQL script creates a database called `shopdb` with four tables:
 customers ──< orders ──< order_items >── products
 ```
 
-- **customers** — registered customers
-- **products** — spanning Electronics, Accessories, and Furniture
-- **orders** — orders with statuses: pending, shipped, delivered, cancelled
-- **order_items** — linking orders to products (many-to-many)
+- **customers**: registered customers
+- **products**: spanning Electronics, Accessories, and Furniture
+- **orders**: orders with statuses: pending, shipped, delivered, cancelled
+- **order_items**: linking orders to products (many-to-many)
 
 ---
 
