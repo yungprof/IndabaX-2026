@@ -1,5 +1,5 @@
 # Introduction to SQL and Relational Databases
-### GDSS Workshop — Day 2
+### GDSS Workshop (Day 2)
 
 This folder contains all materials for Day 1 of the GDSS SQL workshop. The session runs for 3 hours and covers the foundations of relational databases and SQL using PostgreSQL. It is designed to flow directly into Day 2: *Data Transformation, Manipulation, and Preparation in SQL*.
 
@@ -22,7 +22,7 @@ This folder contains all materials for Day 1 of the GDSS SQL workshop. The sessi
 **Duration:** 3 hours  
 **Level:** Beginner  
 **Tool:** PostgreSQL 18 (pgAdmin)  
-**Database:** `shopdb` — a fictional e-commerce store with 4 tables
+**Database:** `shopdb` - a fictional e-commerce store with 4 tables
 
 | Time | Module |
 |---|---|
@@ -45,10 +45,10 @@ The SQL script creates a database called `shopdb` with four tables:
 customers ──< orders ──< order_items >── products
 ```
 
-- **customers**: registered customers
-- **products**: spanning Electronics, Accessories, and Furniture
-- **orders**: orders with statuses: pending, shipped, delivered, cancelled
-- **order_items**: linking orders to products (many-to-many)
+- **customers**:  registered customers
+- **products**:  spanning Electronics, Accessories, and Furniture
+- **orders**:  orders with statuses: pending, shipped, delivered, cancelled
+- **order_items**:  linking orders to products (many-to-many)
 
 ---
 
@@ -81,4 +81,4 @@ By the end of this session, participants will be able to:
 
 ---
 
-*Day 1 of 2 — GDSS SQL Workshop*
+*Day 2 of 3 — GDSS SQL Workshop*
