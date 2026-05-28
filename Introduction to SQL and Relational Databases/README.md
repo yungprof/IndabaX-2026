@@ -51,19 +51,6 @@ customers ──< orders ──< order_items >── products
 
 ---
 
-## How to Run the SQL Script
-
-1. Open **pgAdmin** and connect to your PostgreSQL server
-2. Right-click **Databases → Create → Database**, name it `shopdb`, and save
-3. Click on `shopdb` to select it
-4. Open the **Query Tool** (Tools → Query Tool or `Alt+Shift+Q`)
-5. Open `shopdb_workshop.sql` via **File → Open**
-6. Run **Part 1** first to create and populate the tables (`F5` or the Run button)
-7. Confirm the setup by checking the verification query at the bottom of Part 1 — you should see row counts of 8, 10, 12, and 17
-8. Work through Parts 2–7 section by section during the session
-
----
-
 ## Learning Outcomes
 
 By the end of this session, participants will be able to:
@@ -82,19 +69,14 @@ By the end of this session, participants will be able to:
 
 ---
 
-## Prerequisites
+## 📫 Facilitators
+**Eric Inkoom Ayitey**  
+📧 [Email](mailto:ericinkoomayitey@gmail.com)  
+🌍 [LinkedIn](https://www.linkedin.com/in/eric-inkoom-ayitey/)
 
-No prior SQL knowledge is required. Participants should have:
-
-- PostgreSQL 16 installed (or access to a cloud PostgreSQL instance)
-- pgAdmin installed and connected to a running PostgreSQL server
-- Basic comfort using a computer and opening files
-
----
-
-## Connection to Day 2
-
-This session is designed to hand off cleanly to Day 2: *Data Transformation, Manipulation, and Preparation in SQL*. The same `shopdb` database is used in Day 2. By the end of Day 1, participants will have the schema knowledge and query foundations that Day 2 builds on directly — particularly for joining tables, casting data types, and aggregating results.
+**Anita Esi Eshun**  
+📧 [Email](mailto:anitaeshun5@gmail.com)  
+🌍 [LinkedIn](https://www.linkedin.com/in/anita-esi-eshun-4968141b1/)
 
 ---
 
