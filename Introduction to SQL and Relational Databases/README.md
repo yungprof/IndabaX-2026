@@ -13,6 +13,7 @@ This folder contains all materials for Day 1 of the GDSS SQL workshop. The sessi
 | `SQL_Session_Outline.docx` | Detailed session outline with timings, module breakdown, and learning outcomes |
 | `SQL_Facilitation_Presentation.pptx` | Facilitation PowerPoint presentation slides including basic definitions, exercises, and facilitation notes |
 | `README.md` | This file |
+| `Session_Requirements.pdf` | Requirements or Prerequisites for the session |
 
 ---
 
