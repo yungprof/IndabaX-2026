@@ -1,2 +1,0 @@
-# data/documents/doc_06.txt
-Vector embeddings are high‑dimensional numeric representations of text that capture semantic similarity. By normalizing each vector, the dot product approximates cosine similarity, allowing efficient nearest‑neighbor search. A query is embedded, and the system returns the closest vectors—usually the most relevant passages—for downstream use. In RAG, these vectors are the backbone of the retrieval phase.

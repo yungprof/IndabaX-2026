@@ -1,2 +1,0 @@
-# data/documents/doc_17.txt
-LLM context windows are the maximum token limit that a model can process in a single prompt—often 8,000 to 32,000 tokens for GPT‑4. This limit constrains how much history an agent can keep in‑memory and forces designers to compress or truncate earlier dialogue. A small window requires careful summarization or a rolling buffer; a larger window allows more direct context but still demands efficient memory management to keep performance predictable.

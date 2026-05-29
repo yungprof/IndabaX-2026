@@ -1,2 +1,0 @@
-# data/documents/doc_09.txt
-The Model Context Protocol (MCP) defines how an LLM and external components exchange structured data. MCP specifies the JSON schema for tool calls, tool responses, and conversation history, ensuring that the agent’s state is machine‑readable and version‑controlled. By standardizing the context format, MCP enables seamless integration of new tools, logging, and monitoring without changing the core prompt.

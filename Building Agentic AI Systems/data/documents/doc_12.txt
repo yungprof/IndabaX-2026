@@ -1,2 +1,0 @@
-# data/documents/doc_12.txt
-Evaluating agents requires metrics that cover correctness, efficiency, and safety. **Correctness** measures whether the final answer meets the user’s intent. **Efficiency** looks at the number of tool calls relative to a baseline. **Safety** checks for forbidden actions or misuse of data. Together, these criteria provide a balanced view of agent performance and help guide iterative improvement.

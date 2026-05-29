@@ -1,2 +1,0 @@
-# data/documents/doc_13.txt
-Human‑in‑the‑loop (HITL) design inserts a human checkpoint when the model’s confidence is low, when a critical decision is required, or when the task involves sensitive data. HITL can be triggered by confidence thresholds, explicit tool calls, or by detecting that the model is about to perform an irreversible action. This approach balances automation speed with accountability and reduces the risk of unwanted outcomes.

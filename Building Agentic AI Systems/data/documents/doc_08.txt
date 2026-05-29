@@ -1,2 +1,0 @@
-# data/documents/doc_08.txt
-Multi‑agent systems comprise a **coordinator** that orchestrates tasks and several **specialists** that perform domain‑specific actions. The coordinator assigns sub‑goals, tracks progress, and resolves conflicts, while specialists focus on execution. This decomposition mirrors human teams: a manager delegates to experts. The communication protocol must be lightweight and deterministic to avoid race conditions and ensure reproducibility.

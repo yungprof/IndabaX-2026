@@ -1,2 +1,0 @@
-# data/documents/doc_14.txt
-OpenAI was founded in 2015 by Elon Musk, Sam Altman, Greg Brockman, Ilya Sutskever, Wojciech Zaremba, and John Schulman. Its mission is to ensure that artificial general intelligence benefits all of humanity. Key models include GPT‑3, GPT‑4, and the specialized Codex model for code generation.
