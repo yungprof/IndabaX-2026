@@ -1,0 +1,121 @@
+{
+  "system": "Ghana Health Service Referral Tier System",
+  "description": "Ghana's public health system operates on a tiered referral model. Patients should enter at the lowest appropriate level and be referred upward as needed.",
+  "tiers": [
+    {
+      "level": 1,
+      "name": "CHPS Compound",
+      "full_name": "Community-based Health Planning and Services",
+      "description": "The first point of contact for most Ghanaians, especially in rural and peri-urban areas. Staffed by Community Health Officers (CHOs) and nurses.",
+      "typical_services": [
+        "Basic outpatient consultation",
+        "Antenatal care",
+        "Child health / growth monitoring",
+        "Immunisation",
+        "Health education",
+        "Treatment of minor illnesses (malaria, respiratory infections, wounds)",
+        "Referrals to higher level when needed"
+      ],
+      "cannot_handle": [
+        "Surgery",
+        "Inpatient admission",
+        "Laboratory tests",
+        "Emergency stabilisation",
+        "Specialist consultations"
+      ],
+      "referral_triggers": [
+        "Condition not improving after 48 hours",
+        "Severe symptoms at first presentation",
+        "Need for lab confirmation",
+        "Pregnancy complications",
+        "Injuries requiring suturing or X-ray"
+      ]
+    },
+    {
+      "level": 2,
+      "name": "Health Centre / Polyclinic",
+      "full_name": "Primary Health Centre",
+      "description": "Broader primary care with some diagnostic capacity. Managed by medical officers and nurses. Found at sub-district level.",
+      "typical_services": [
+        "Outpatient and limited inpatient care",
+        "Basic laboratory (malaria RDT, haemoglobin, urinalysis)",
+        "Maternity and delivery",
+        "Minor surgery (wound care, abscess drainage)",
+        "Dispensary / pharmacy",
+        "Nutritional rehabilitation (CMAM)"
+      ],
+      "cannot_handle": [
+        "Major surgery",
+        "ICU care",
+        "Specialist consultations",
+        "Complex blood transfusions",
+        "Advanced imaging (CT, MRI)"
+      ],
+      "referral_triggers": [
+        "Needs surgery",
+        "Requires specialist",
+        "IV fluids not resolving condition",
+        "Blood transfusion needed",
+        "Diagnostic tests unavailable"
+      ]
+    },
+    {
+      "level": 3,
+      "name": "District / Municipal Hospital",
+      "full_name": "District Hospital",
+      "description": "Full inpatient hospital with emergency services. Managed by medical officers and specialists. Found at district level.",
+      "typical_services": [
+        "Full emergency and accident unit",
+        "Surgery (general)",
+        "Obstetric emergency management",
+        "Inpatient wards (medical, surgical, paediatric, maternity)",
+        "Blood bank",
+        "Full laboratory",
+        "Pharmacy",
+        "X-ray and ultrasound"
+      ],
+      "cannot_handle": [
+        "Tertiary specialist surgery",
+        "Advanced oncology",
+        "Neurosurgery",
+        "Cardiac surgery",
+        "Organ transplants"
+      ],
+      "referral_triggers": [
+        "Needs specialist surgery",
+        "Condition beyond district capacity",
+        "Requires ICU",
+        "Specialist care needed"
+      ]
+    },
+    {
+      "level": 4,
+      "name": "Regional / Teaching Hospital",
+      "full_name": "Regional or Teaching Hospital",
+      "description": "Tertiary and specialist care. Includes Korle-Bu Teaching Hospital, Komfo Anokye Teaching Hospital, Tamale Teaching Hospital, and regional hospitals.",
+      "typical_services": [
+        "All district hospital services",
+        "Specialist clinics (cardiology, neurology, oncology, etc.)",
+        "ICU and high-dependency care",
+        "Advanced surgery",
+        "Medical training and research",
+        "Advanced imaging (CT, MRI)",
+        "Dialysis"
+      ],
+      "cannot_handle": [],
+      "referral_triggers": []
+    }
+  ],
+  "emergency_contacts": {
+    "national_ambulance": "0800-111-222",
+    "ghs_hotline": "0800-111-222",
+    "note": "Numbers are illustrative for this educational project. Verify real GHS contacts before clinical use."
+  },
+  "referral_principles": [
+    "Always refer with a written referral note describing the patient's condition and what treatment has been given.",
+    "Critical patients should be stabilised before referral where possible.",
+    "A community member or family member should always accompany a referred patient.",
+    "The receiving facility should be called ahead when possible.",
+    "NHIS (National Health Insurance Scheme) covers services at all levels — patients should carry their card."
+  ]
+}

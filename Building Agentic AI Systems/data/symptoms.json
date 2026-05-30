@@ -1,0 +1,161 @@
+{
+  "_note": "Simplified triage mapping for educational use only. Not for clinical deployment.",
+  "conditions": [
+    {
+      "id": "malaria",
+      "name": "Malaria",
+      "common_in_ghana": true,
+      "urgency": "moderate",
+      "symptoms": {
+        "primary": ["fever", "chills", "sweating", "headache"],
+        "secondary": ["nausea", "vomiting", "muscle_pain", "fatigue", "loss_of_appetite"],
+        "severe_indicators": ["confusion", "seizure", "difficulty_breathing", "extreme_weakness", "yellow_eyes"]
+      },
+      "triage_notes": "Fever + chills in Ghana context: assume malaria until tested. Severe indicators require immediate hospital referral.",
+      "recommended_level": 1,
+      "severe_level": 3,
+      "local_names": ["malaria", "fever"]
+    },
+    {
+      "id": "typhoid",
+      "name": "Typhoid Fever",
+      "common_in_ghana": true,
+      "urgency": "moderate",
+      "symptoms": {
+        "primary": ["prolonged_fever", "abdominal_pain", "weakness"],
+        "secondary": ["headache", "loss_of_appetite", "constipation", "diarrhea", "rash"],
+        "severe_indicators": ["intestinal_bleeding", "perforation_signs", "severe_confusion"]
+      },
+      "triage_notes": "Sustained high fever over several days. Needs lab test for confirmation. Refer if fever persists more than 3 days.",
+      "recommended_level": 2,
+      "severe_level": 3,
+      "local_names": ["typhoid", "enteric fever"]
+    },
+    {
+      "id": "cholera",
+      "name": "Cholera",
+      "common_in_ghana": true,
+      "urgency": "high",
+      "symptoms": {
+        "primary": ["severe_watery_diarrhea", "vomiting", "rapid_dehydration"],
+        "secondary": ["muscle_cramps", "weakness", "sunken_eyes"],
+        "severe_indicators": ["shock", "unconsciousness", "no_urine_output"]
+      },
+      "triage_notes": "Notifiable disease. Immediate rehydration. Must refer to facility with IV fluids. Report to GHS.",
+      "recommended_level": 2,
+      "severe_level": 3,
+      "local_names": ["cholera", "diarrhea disease"]
+    },
+    {
+      "id": "respiratory_infection",
+      "name": "Respiratory Tract Infection",
+      "common_in_ghana": true,
+      "urgency": "low",
+      "symptoms": {
+        "primary": ["cough", "sore_throat", "runny_nose"],
+        "secondary": ["mild_fever", "sneezing", "congestion"],
+        "severe_indicators": ["difficulty_breathing", "chest_pain", "coughing_blood", "high_fever_with_cough"]
+      },
+      "triage_notes": "Most cases are viral — rest and fluids. Escalate if breathing is laboured or fever exceeds 3 days.",
+      "recommended_level": 1,
+      "severe_level": 3,
+      "local_names": ["cough", "cold", "catarrh"]
+    },
+    {
+      "id": "hypertension_crisis",
+      "name": "Hypertensive Crisis",
+      "common_in_ghana": true,
+      "urgency": "critical",
+      "symptoms": {
+        "primary": ["severe_headache", "blurred_vision", "chest_pain"],
+        "secondary": ["nausea", "shortness_of_breath", "nosebleed"],
+        "severe_indicators": ["confusion", "stroke_symptoms", "chest_pain_with_breathlessness"]
+      },
+      "triage_notes": "Requires immediate hospital referral. Do not delay for community-level treatment.",
+      "recommended_level": 3,
+      "severe_level": 3,
+      "local_names": ["high blood pressure", "HBP"]
+    },
+    {
+      "id": "snakebite",
+      "name": "Snakebite",
+      "common_in_ghana": true,
+      "urgency": "critical",
+      "symptoms": {
+        "primary": ["bite_wound", "local_swelling", "intense_pain"],
+        "secondary": ["bleeding_from_bite", "nausea", "dizziness"],
+        "severe_indicators": ["spreading_swelling", "difficulty_swallowing", "difficulty_breathing", "bleeding_elsewhere", "paralysis"]
+      },
+      "triage_notes": "ALL snakebites are emergencies. Immobilise limb, keep patient calm, go directly to hospital with antivenom.",
+      "recommended_level": 3,
+      "severe_level": 3,
+      "local_names": ["snakebite", "snake bite"]
+    },
+    {
+      "id": "malnutrition",
+      "name": "Acute Malnutrition",
+      "common_in_ghana": true,
+      "urgency": "moderate",
+      "symptoms": {
+        "primary": ["severe_weight_loss", "swollen_feet_or_face", "muscle_wasting"],
+        "secondary": ["lethargy", "loss_of_appetite", "hair_changes", "skin_changes"],
+        "severe_indicators": ["unconsciousness", "severe_respiratory_distress", "persistent_vomiting"]
+      },
+      "triage_notes": "Children under 5 with visible wasting or oedema must be referred. CMAM programmes available at health centres.",
+      "recommended_level": 2,
+      "severe_level": 3,
+      "local_names": ["malnutrition", "kwashiorkor", "marasmus"]
+    },
+    {
+      "id": "maternal_complication",
+      "name": "Obstetric Emergency",
+      "common_in_ghana": true,
+      "urgency": "critical",
+      "symptoms": {
+        "primary": ["heavy_vaginal_bleeding_in_pregnancy", "severe_abdominal_pain_in_pregnancy", "not_feeling_baby_move"],
+        "secondary": ["severe_headache_in_pregnancy", "swollen_face_hands_in_pregnancy", "convulsions_in_pregnancy"],
+        "severe_indicators": ["convulsions", "unconsciousness", "heavy_bleeding_after_delivery"]
+      },
+      "triage_notes": "Any of these in a pregnant or recently delivered woman = emergency referral immediately.",
+      "recommended_level": 3,
+      "severe_level": 3,
+      "local_names": ["pregnancy complication", "labour complication"]
+    },
+    {
+      "id": "wound_infection",
+      "name": "Wound / Skin Infection",
+      "common_in_ghana": true,
+      "urgency": "low",
+      "symptoms": {
+        "primary": ["wound", "redness_around_wound", "pus_discharge"],
+        "secondary": ["swelling", "warmth", "tenderness"],
+        "severe_indicators": ["red_streaks_from_wound", "fever_with_wound", "spreading_fast", "foul_smell"]
+      },
+      "triage_notes": "Minor wounds: CHPS compound. Red streaks (cellulitis spreading) = escalate urgently to prevent sepsis.",
+      "recommended_level": 1,
+      "severe_level": 2,
+      "local_names": ["wound", "sore", "boil"]
+    },
+    {
+      "id": "unknown",
+      "name": "Unmatched / Unclear Presentation",
+      "common_in_ghana": true,
+      "urgency": "moderate",
+      "symptoms": {
+        "primary": [],
+        "secondary": [],
+        "severe_indicators": []
+      },
+      "triage_notes": "Symptoms do not match a known pattern. Recommend CHPS or health centre visit for proper assessment.",
+      "recommended_level": 2,
+      "severe_level": 3,
+      "local_names": []
+    }
+  ],
+  "urgency_levels": {
+    "low": "Can be managed at CHPS or at home with guidance",
+    "moderate": "Should visit a health facility within 24 hours",
+    "high": "Should visit a facility today. Do not delay.",
+    "critical": "Emergency. Go to hospital immediately or call for help."
+  }
+}

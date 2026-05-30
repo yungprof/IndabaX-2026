@@ -1,0 +1,175 @@
+{
+  "facilities": [
+    {
+      "id": "GH-AA-001",
+      "name": "Dodowa Health Centre",
+      "type": "health_centre",
+      "district": "Shai Osudoku",
+      "region": "Greater Accra",
+      "level": 2,
+      "services": ["outpatient", "maternity", "child_health", "lab"],
+      "emergency": false,
+      "coordinates": { "lat": 5.8972, "lng": 0.1289 }
+    },
+    {
+      "id": "GH-AA-002",
+      "name": "Prampram CHPS Compound",
+      "type": "chps",
+      "district": "Ningo Prampram",
+      "region": "Greater Accra",
+      "level": 1,
+      "services": ["outpatient", "child_health", "antenatal"],
+      "emergency": false,
+      "coordinates": { "lat": 5.7198, "lng": 0.1097 }
+    },
+    {
+      "id": "GH-AA-003",
+      "name": "Tema General Hospital",
+      "type": "district_hospital",
+      "district": "Tema Metropolitan",
+      "region": "Greater Accra",
+      "level": 3,
+      "services": ["outpatient", "inpatient", "emergency", "surgery", "maternity", "lab", "pharmacy"],
+      "emergency": true,
+      "coordinates": { "lat": 5.6698, "lng": 0.0166 }
+    },
+    {
+      "id": "GH-AH-001",
+      "name": "Kumasi South Hospital",
+      "type": "district_hospital",
+      "district": "Kumasi Metropolitan",
+      "region": "Ashanti",
+      "level": 3,
+      "services": ["outpatient", "inpatient", "emergency", "surgery", "maternity", "lab", "pharmacy"],
+      "emergency": true,
+      "coordinates": { "lat": 6.6885, "lng": -1.6244 }
+    },
+    {
+      "id": "GH-AH-002",
+      "name": "Juaben CHPS Compound",
+      "type": "chps",
+      "district": "Juaben Municipal",
+      "region": "Ashanti",
+      "level": 1,
+      "services": ["outpatient", "child_health", "antenatal", "immunisation"],
+      "emergency": false,
+      "coordinates": { "lat": 6.8064, "lng": -1.4532 }
+    },
+    {
+      "id": "GH-AH-003",
+      "name": "Bekwai Municipal Hospital",
+      "type": "municipal_hospital",
+      "district": "Bekwai Municipal",
+      "region": "Ashanti",
+      "level": 3,
+      "services": ["outpatient", "inpatient", "emergency", "maternity", "lab"],
+      "emergency": true,
+      "coordinates": { "lat": 6.4516, "lng": -1.5778 }
+    },
+    {
+      "id": "GH-NR-001",
+      "name": "Tamale Teaching Hospital",
+      "type": "teaching_hospital",
+      "district": "Tamale Metropolitan",
+      "region": "Northern",
+      "level": 4,
+      "services": ["outpatient", "inpatient", "emergency", "surgery", "icu", "maternity", "lab", "pharmacy", "specialist"],
+      "emergency": true,
+      "coordinates": { "lat": 9.4008, "lng": -0.8393 }
+    },
+    {
+      "id": "GH-NR-002",
+      "name": "Tolon CHPS Compound",
+      "type": "chps",
+      "district": "Tolon",
+      "region": "Northern",
+      "level": 1,
+      "services": ["outpatient", "child_health", "antenatal"],
+      "emergency": false,
+      "coordinates": { "lat": 9.4383, "lng": -1.0719 }
+    },
+    {
+      "id": "GH-WR-001",
+      "name": "Effia Nkwanta Regional Hospital",
+      "type": "regional_hospital",
+      "district": "Sekondi Takoradi Metropolitan",
+      "region": "Western",
+      "level": 4,
+      "services": ["outpatient", "inpatient", "emergency", "surgery", "maternity", "lab", "pharmacy"],
+      "emergency": true,
+      "coordinates": { "lat": 4.9127, "lng": -1.7739 }
+    },
+    {
+      "id": "GH-WR-002",
+      "name": "Axim CHPS Compound",
+      "type": "chps",
+      "district": "Nzema East Municipal",
+      "region": "Western",
+      "level": 1,
+      "services": ["outpatient", "child_health", "antenatal", "immunisation"],
+      "emergency": false,
+      "coordinates": { "lat": 4.8690, "lng": -2.2380 }
+    },
+    {
+      "id": "GH-ER-001",
+      "name": "Koforidua Regional Hospital",
+      "type": "regional_hospital",
+      "district": "New Juaben South Municipal",
+      "region": "Eastern",
+      "level": 4,
+      "services": ["outpatient", "inpatient", "emergency", "surgery", "maternity", "lab", "pharmacy"],
+      "emergency": true,
+      "coordinates": { "lat": 6.0940, "lng": -0.2598 }
+    },
+    {
+      "id": "GH-ER-002",
+      "name": "Nkawkaw CHPS Compound",
+      "type": "chps",
+      "district": "Kwahu West Municipal",
+      "region": "Eastern",
+      "level": 1,
+      "services": ["outpatient", "child_health", "antenatal"],
+      "emergency": false,
+      "coordinates": { "lat": 6.5564, "lng": -0.7729 }
+    },
+    {
+      "id": "GH-VR-001",
+      "name": "Ho Teaching Hospital",
+      "type": "teaching_hospital",
+      "district": "Ho Municipal",
+      "region": "Volta",
+      "level": 4,
+      "services": ["outpatient", "inpatient", "emergency", "surgery", "maternity", "lab", "pharmacy", "specialist"],
+      "emergency": true,
+      "coordinates": { "lat": 6.6011, "lng": 0.4700 }
+    },
+    {
+      "id": "GH-UW-001",
+      "name": "Wa Regional Hospital",
+      "type": "regional_hospital",
+      "district": "Wa Municipal",
+      "region": "Upper West",
+      "level": 4,
+      "services": ["outpatient", "inpatient", "emergency", "surgery", "maternity", "lab", "pharmacy"],
+      "emergency": true,
+      "coordinates": { "lat": 10.0601, "lng": -2.5099 }
+    },
+    {
+      "id": "GH-UE-001",
+      "name": "Bolgatanga Regional Hospital",
+      "type": "regional_hospital",
+      "district": "Bolgatanga Municipal",
+      "region": "Upper East",
+      "level": 4,
+      "services": ["outpatient", "inpatient", "emergency", "surgery", "maternity", "lab", "pharmacy"],
+      "emergency": true,
+      "coordinates": { "lat": 10.7860, "lng": -0.8514 }
+    }
+  ],
+  "facility_levels": {
+    "1": "CHPS Compound — community-level, first contact, limited services",
+    "2": "Health Centre — broader primary care, some diagnostic capacity",
+    "3": "District / Municipal Hospital — inpatient, emergency, surgery",
+    "4": "Regional / Teaching Hospital — specialist care, full emergency, ICU"
+  }
+}

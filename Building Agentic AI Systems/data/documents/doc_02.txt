@@ -1,4 +1,0 @@
-# data/documents/doc_02.txt
-In AI, an **agent** is any system that perceives its environment and takes actions to achieve goals. A **chain** is a fixed sequence of transformations—often a series of LLM prompts—without decision points. A **chatbot** is a specialized agent that focuses on dialogue and is typically designed to answer user queries in a conversational manner. While a chatbot can be built using a chain, true agents incorporate feedback loops, tool calls, and state‑tracking so they can adapt to new information and iterate toward a goal.
-
-The key difference is autonomy: agents plan, act, and observe; chains simply pass data through predetermined steps; chatbots respond based on the conversation but do not self‑direct beyond a pre‑written script.

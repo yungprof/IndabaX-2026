@@ -1,2 +1,0 @@
-# data/documents/doc_15.txt
-Anthropic was founded in 2020 by former OpenAI employees, including Dario Amodei and Peter Welbl. Its mission is to build AI systems that are safe, interpretable, and aligned with human values. Anthropic’s flagship model is Claude, a large language model designed for conversational and reasoning tasks.

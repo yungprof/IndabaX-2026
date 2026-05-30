@@ -1,2 +1,0 @@
-# data/documents/doc_16.txt
-DeepMind was founded in 2010 by Demis Hassabis, Shane Legg, and Mustafa Suleyman. Its mission is to solve intelligence and then use that intelligence to solve big problems. Notable research includes AlphaGo, AlphaZero, and the WaveNet speech model. DeepMind focuses on reinforcement learning, neural architecture search, and large‑scale language modeling.

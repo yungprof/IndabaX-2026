@@ -1,4 +1,0 @@
-# data/documents/doc_03.txt
-Function calling lets an LLM invoke external tools as part of its reasoning. When the model emits a tool call, it supplies the function name and arguments in JSON. The runtime receives that call, validates the arguments, executes the underlying function, and returns the result to the LLM. This approach keeps the LLM’s internal logic intact while enabling precise, reliable interactions—like searching the web or reading a file—without the model hallucinating data. The function signature is defined in OpenAI’s tool specification, which ensures consistent parsing and type safety.
-
-By separating the LLM’s language generation from the tool execution, we preserve the model’s generality and add deterministic, verifiable behavior. The agent can therefore combine reasoning and reliable computation in a single dialogue turn.

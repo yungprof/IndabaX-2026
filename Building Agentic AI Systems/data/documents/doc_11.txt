@@ -1,2 +1,0 @@
-# data/documents/doc_11.txt
-Common failure modes in autonomous agents include: **infinite loops** where the agent keeps generating tool calls without reaching a goal; **hallucination** where the model fabricates facts; **compounding errors** when early mistakes cascade into later decisions; and **resource exhaustion** when an agent repeatedly calls costly tools. Identifying these patterns early and building guards—such as iteration limits or sanity checks—helps keep agent behavior safe and predictable.

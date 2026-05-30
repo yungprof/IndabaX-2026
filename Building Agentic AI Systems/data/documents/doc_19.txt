@@ -1,2 +1,0 @@
-# data/documents/doc_19.txt
-LiteLLM is an open‑source framework for routing requests to multiple LLM providers. It abstracts the model interface, handles rate limits, and offers a simple API for developers to plug in new back‑ends. LiteLLM is useful for multi‑model pipelines, experimentation, and cost optimization.

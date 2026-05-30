@@ -1,2 +1,0 @@
-# data/documents/doc_07.txt
-The ReAct prompting pattern encourages an LLM to alternate between **Thought** (reasoning), **Action** (tool call), and **Observation** (result). This explicit back‑and‑forth loop mirrors human debugging and allows the model to self‑correct. Each step is clear in the prompt, making the agent’s internal state transparent and easier to audit. By forcing the model to explain its actions before executing them, ReAct reduces hallucination and aligns behavior with the desired outcome.

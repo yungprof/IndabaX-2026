@@ -1,2 +1,0 @@
-# data/documents/doc_18.txt
-Sandboxing protects an agent’s execution environment from malicious or accidental actions. Techniques include running code in isolated containers, limiting filesystem access, and employing runtime permissions. By constraining what an agent can read, write, or modify, sandboxing reduces the risk of data leaks, accidental deletion, or compromised infrastructure.

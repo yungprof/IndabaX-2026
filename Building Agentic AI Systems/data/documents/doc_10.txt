@@ -1,2 +1,0 @@
-# data/documents/doc_10.txt
-Agent‑to‑Agent (A2A) protocol is a lightweight message passing interface between autonomous agents. Each message contains a JSON payload with a task description, input data, and a unique identifier. Agents can acknowledge receipt, report status, or return results. A2A allows agents to collaborate without sharing internal state, preserving encapsulation while enabling coordinated problem‑solving.

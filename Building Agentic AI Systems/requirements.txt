@@ -1,5 +1,19 @@
-openai>=1.30.0
-numpy>=1.26.0
+# AMA Health Agent — Dependencies
+# Install with: pip install -r requirements.txt
+
+# HTTP client for OpenRouter API calls
+httpx>=0.27.0
+
+# Load environment variables from .env
 python-dotenv>=1.0.0
-tiktoken>=0.7.0
-requests>=2.31.0
+
+# Test runner
+pytest>=8.0.0
+pytest-mock>=3.12.0
+
+# Optional: for the advanced fuzzy matching exercise
+# difflib is part of the Python standard library — no install needed
+
+# Optional: for a web interface beyond the CLI (not required for workshop)
+# fastapi>=0.110.0
+# uvicorn>=0.29.0

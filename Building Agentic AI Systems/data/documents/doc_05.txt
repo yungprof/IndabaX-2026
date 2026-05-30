@@ -1,2 +1,0 @@
-# data/documents/doc_05.txt
-Retrieval‑Augmented Generation (RAG) combines an LLM with an external knowledge source. The system first retrieves the most relevant documents or snippets from a vector store or database, then passes those excerpts into the prompt as context. The model uses this evidence to generate answers that are both grounded and fluent. RAG is essential for tasks that require up‑to‑date facts, domain knowledge, or specialized references that the LLM cannot reliably remember.
