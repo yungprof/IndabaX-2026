@@ -1,0 +1,622 @@
+---
+title: "Synthetic Data Enrichment Practical (WebR)"
+subtitle: "GLSS6 2012/13 → DHS 2014 | IndabaX Ghana 2026 (ACET)"
+author: "Austin Denteh · Prince Baah · Blaise Bayuo"
+date: "June 24, 2026"
+format:
+  html:
+    theme: flatly
+    toc: true
+    toc-location: left
+    number-sections: true
+    self-contained: true
+engine: knitr
+filters:
+  - webr
+webr:
+  channel-type: post-message
+  show-startup-message: true
+  packages:
+    - dplyr
+    - tidyr
+    - ggplot2
+    - mice
+---
+
+This is the browser (WebR) version of `part2-synthetic-data-tutorial-practical-indabax-2026.Rmd` — it mirrors
+the same sections and outputs, computed live in your browser on a small **subsampled** extract of the
+real GLSS6 → DHS 2014 teaching data, fetched from the workshop data repo. No R install needed. For
+the full analysis (`m = 5`, all rows), run the local notebook. Settings here are reduced (`m = 3`)
+for browser speed.
+
+# Setup
+
+```{webr-r}
+library(dplyr); library(tidyr); library(ggplot2); library(mice)
+
+data_base_url <- "https://raw.githubusercontent.com/austindenteh/acet-workshop-data-temp/main"
+
+DATA_FAMILY <- "teaching (subsampled, hosted)"
+POV_EXTREME <- 792.05
+POV_ABSOLUTE <- 1314
+SYNTH_SEED <- 20260614
+EXTENSION_SEED <- 20260616
+M <- 3; MAXIT <- 2            # reduced for browser speed (local notebook uses 5/5)
+
+w_mean <- function(x, w) { ok <- !is.na(x) & !is.na(w); if (!any(ok)) return(NA_real_); weighted.mean(x[ok], w[ok]) }
+w_rate <- function(x, w) 100 * w_mean(as.numeric(x), w)
+
+w_tab <- function(dat, var, weight = "household_weight", source_label = NULL) {
+  d <- dat %>% filter(!is.na(.data[[var]]), !is.na(.data[[weight]])) %>%
+    mutate(value = as.character(.data[[var]]))
+  d %>% group_by(value) %>%
+    summarise(n = n(), pct_w = 100 * sum(.data[[weight]]) / sum(d[[weight]]), .groups = "drop") %>%
+    mutate(variable = var, survey = source_label, pct_w = round(pct_w, 1)) %>%
+    select(survey, variable, value, pct_w, n)
+}
+
+pool_scalar <- function(q, u) {
+  m <- length(q); qbar <- mean(q, na.rm=TRUE); ubar <- mean(u, na.rm=TRUE); b <- var(q, na.rm=TRUE)
+  total <- ubar + (1 + 1/m) * b
+  data.frame(estimate=qbar, within_var=ubar, between_var=b, total_var=total, se=sqrt(total))
+}
+
+weighted_binary_est <- function(x, w) {
+  ok <- !is.na(x) & !is.na(w); x <- as.numeric(x[ok]); w <- w[ok]
+  p <- weighted.mean(x, w); n_eff <- sum(w)^2 / sum(w^2)
+  data.frame(estimate=p, var=p*(1-p)/n_eff)
+}
+
+recovery_metrics <- function(dat, label) {
+  dat %>% group_by(.imp) %>%
+    summarise(mae_log=mean(abs(synth_log_welfare-log(true_welfare)),na.rm=TRUE),
+              rmse_log=sqrt(mean((synth_log_welfare-log(true_welfare))^2,na.rm=TRUE)),
+              corr_log=cor(synth_log_welfare,log(true_welfare),use="complete.obs"),
+              synth_poverty_rate_w=w_rate(synth_poor,household_weight),
+              true_poverty_rate_w=w_rate(true_poor,household_weight),.groups="drop") %>%
+    summarise(engine=label, mae_log=mean(mae_log), rmse_log=mean(rmse_log),
+              corr_log=mean(corr_log), synth_poverty_rate_w=mean(synth_poverty_rate_w),
+              true_poverty_rate_w=mean(true_poverty_rate_w), .groups="drop")
+}
+
+cat("setup ready\n")
+```
+
+# Dataset Warm-Up
+
+We fetch the prepared household and child files. Each survey observes a different piece of the
+policy question.
+
+```{webr-r}
+fetch <- function(name) {
+  f <- paste0(name, ".csv"); download.file(file.path(data_base_url, f), f, quiet = TRUE)
+  read.csv(f, stringsAsFactors = FALSE)
+}
+glss_train    <- fetch("webr_glss_train")
+glss_holdout  <- fetch("webr_glss_holdout")
+dhs_households <- fetch("webr_dhs_households")
+dhs_children  <- fetch("webr_dhs_children")
+
+surface_counts <- data.frame(
+  file = c("GLSS train households","GLSS holdout households","DHS target households","DHS children"),
+  rows = c(nrow(glss_train), nrow(glss_holdout), nrow(dhs_households), nrow(dhs_children)),
+  columns = c(ncol(glss_train), ncol(glss_holdout), ncol(dhs_households), ncol(dhs_children)))
+knitr::kable(surface_counts)
+```
+
+## What Each Survey Contributes
+
+```{webr-r}
+observed_map <- data.frame(
+  concept = c("Shared household predictors","Welfare aggregate","Derived poverty status",
+              "Any household member registered with NHIS","DHS wealth benchmark",
+              "Child nutrition and illness outcomes"),
+  glss = c("Observed","Observed","Observed from welfare","Observed","Not observed","Not observed"),
+  dhs_households = c("Observed","Missing by design","Missing by design","Observed (transport target)",
+                     "Observed","Household link only"),
+  dhs_children = c("Linked through household","Not observed","Not observed","Linked through household",
+                   "Linked through household","Observed"))
+knitr::kable(observed_map)
+```
+
+```{webr-r}
+binary_summary <- data.frame(
+  survey = c("GLSS train","DHS households"),
+  urban_pct_w = c(w_rate(glss_train$urban, glss_train$household_weight),
+                  w_rate(dhs_households$urban, dhs_households$household_weight)),
+  electricity_pct_w = c(w_rate(glss_train$has_electricity, glss_train$household_weight),
+                        w_rate(dhs_households$has_electricity, dhs_households$household_weight)),
+  female_head_pct_w = c(w_rate(glss_train$head_female, glss_train$household_weight),
+                        w_rate(dhs_households$head_female, dhs_households$household_weight)),
+  mean_hh_size_w = c(w_mean(glss_train$hh_size, glss_train$household_weight),
+                     w_mean(dhs_households$hh_size, dhs_households$household_weight))) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 1)))
+knitr::kable(binary_summary)
+```
+
+```{webr-r}
+region_summary <- bind_rows(
+  w_tab(glss_train, "region10", source_label = "GLSS train"),
+  w_tab(dhs_households, "region10", source_label = "DHS households")) %>%
+  select(variable, value, survey, pct_w) %>%
+  pivot_wider(names_from = survey, values_from = pct_w)
+knitr::kable(region_summary)
+```
+
+```{webr-r}
+housing_summary <- bind_rows(
+  w_tab(glss_train, "floor_material_screen", source_label = "GLSS train"),
+  w_tab(dhs_households, "floor_material_screen", source_label = "DHS households"),
+  w_tab(glss_train, "water_source_cat", source_label = "GLSS train"),
+  w_tab(dhs_households, "water_source_cat", source_label = "DHS households")) %>%
+  select(variable, value, survey, pct_w) %>%
+  pivot_wider(names_from = survey, values_from = pct_w) %>% arrange(variable, value)
+knitr::kable(housing_summary)
+```
+
+The welfare distribution is skewed, which motivates the log-welfare model used later.
+
+```{webr-r}
+ggplot(glss_train, aes(x = welfare)) +
+  geom_histogram(bins = 45, fill = "#2f6f73", color = "white") +
+  scale_x_log10() + labs(x = "GLSS welfare, log scale", y = "Households") +
+  theme_minimal(base_size = 12)
+```
+
+```{webr-r}
+nhis_warmup <- data.frame(
+  survey = c("GLSS train","DHS households"),
+  nhis_any_member_registered_pct_w = round(c(
+    w_rate(glss_train$nhis_any_member_registered, glss_train$household_weight),
+    w_rate(dhs_households$nhis_any_member_registered, dhs_households$household_weight)), 1))
+knitr::kable(nhis_warmup)
+```
+
+## Weighted vs. Unweighted Summaries
+
+The model is fit unweighted (the `mice` engines take no case weights); summaries use
+`household_weight`. This distinction matters.
+
+```{webr-r}
+weighted_unweighted <- data.frame(
+  statistic = c("GLSS poverty rate","GLSS urban share"),
+  unweighted = c(mean(glss_train$welfare < POV_ABSOLUTE, na.rm=TRUE), mean(glss_train$urban, na.rm=TRUE)),
+  weighted = c(w_mean(glss_train$welfare < POV_ABSOLUTE, glss_train$household_weight),
+               w_mean(glss_train$urban, glss_train$household_weight))) %>%
+  mutate(across(c(unweighted, weighted), ~ round(100 * .x, 1)))
+knitr::kable(weighted_unweighted)
+```
+
+# Run the Imputation (computed live)
+
+This fits `mice` on the GLSS training rows only (`ignore =`), draws `m` imputed datasets, derives
+poverty from each drawn welfare, and builds every object the later sections display. *(This is the
+slow cell.)*
+
+```{webr-r}
+manifest <- read.csv(text = "variable,manifest_role
+region10,predictor_core
+urban,predictor_core
+hh_size,predictor_core
+head_age,predictor_core
+head_female,predictor_core
+has_electricity,predictor_sensitivity_calibration_target
+water_source_cat,predictor_core
+cooking_fuel_cat,predictor_core
+roof_material_cat,predictor_core
+sleeping_rooms,predictor_core
+toilet_type_screen,predictor_sensitivity
+floor_material_screen,predictor_core
+floor_non_earth,predictor_core
+wall_finished_masonry,predictor_default_off
+head_educ_cat,predictor_sensitivity
+members_total,predictor_core
+female_members,predictor_core
+children_under5,predictor_core
+children_under15,predictor_core
+adults_15plus,predictor_core
+elders_65plus,predictor_core
+welfare,target_active
+poverty_status,target_derive_only
+nhis_any_member_registered,target_active_sensitivity
+wealth_index,dhs_benchmark_only
+household_weight,weight_fitting
+hh_key,id", stringsAsFactors = FALSE)
+
+core_pred <- manifest$variable[manifest$manifest_role == "predictor_core"]
+collinear_drop <- c("members_total", "adults_15plus", "floor_non_earth")
+model_pred <- setdiff(core_pred, collinear_drop)
+cat_predictors <- intersect(c("region10","water_source_cat","cooking_fuel_cat",
+                              "roof_material_cat","floor_material_screen"), core_pred)
+
+derive_poverty <- function(welfare)
+  cut(welfare, c(-Inf,POV_EXTREME,POV_ABSOLUTE,Inf), labels=c("Very poor","Poor","Non poor"))
+
+build_frame <- function(apply_dat, targets_to_mask, extra_cols = character(0)) {
+  cols <- c("hh_key","household_weight", core_pred, "welfare","nhis_any_member_registered", extra_cols)
+  tr <- glss_train %>% select(any_of(cols)) %>% mutate(.role="train")
+  ap <- apply_dat  %>% select(any_of(cols)) %>% mutate(.role="apply")
+  s <- bind_rows(tr, ap) %>%
+    mutate(log_welfare = ifelse(!is.na(welfare) & welfare > 0, log(welfare), NA_real_))
+  for (v in targets_to_mask) s[[v]][s$.role == "apply"] <- NA
+  for (v in intersect(c(cat_predictors,"head_educ_cat","toilet_type_screen"), names(s))) s[[v]] <- factor(s[[v]])
+  s$region10 <- factor(s$region10)
+  s$nhis_any_member_registered <- factor(s$nhis_any_member_registered, levels=c(0,1))
+  if ("has_electricity" %in% names(s)) s$has_electricity <- factor(s$has_electricity, levels=c(0,1))
+  s
+}
+
+run_mice <- function(frame, methods, preds) {
+  mc <- setdiff(names(frame), c("hh_key","household_weight","welfare",".role", collinear_drop))
+  md <- frame[, mc]; meth <- make.method(md)
+  # make.method() also assigns default methods to any shared predictors X with
+  # incidental missing cells. Here that is a small convenience; the main
+  # synthetic target remains the missing welfare/NHIS/electricity block.
+  for (v in names(methods)) meth[v] <- methods[v]
+  pm <- make.predictorMatrix(md)
+  for (v in names(preds)) { pm[v,] <- 0; pm[v, intersect(preds[[v]], colnames(pm))] <- 1 }
+  mice(md, m=M, maxit=MAXIT, seed=SYNTH_SEED, method=meth, predictorMatrix=pm,
+       ignore=frame$.role=="apply", printFlag=FALSE)
+}
+
+collect_draws <- function(imp, frame) bind_rows(lapply(seq_len(M), function(i) {
+  comp <- complete(imp, i)
+  frame %>% select(hh_key, household_weight, .role) %>%
+    mutate(.imp=i, synth_log_welfare=comp$log_welfare, synth_welfare=exp(comp$log_welfare),
+           synth_nhis=as.integer(as.character(comp$nhis_any_member_registered)),
+           synth_poverty_status=as.character(derive_poverty(exp(comp$log_welfare))),
+           synth_poor=as.integer(exp(comp$log_welfare) < POV_ABSOLUTE)) %>%
+    filter(.role=="apply") %>% select(-.role)
+}))
+
+## RUN A: holdout validation
+frame_a <- build_frame(glss_holdout, c("log_welfare","nhis_any_member_registered"))
+imp_a <- run_mice(frame_a, c(log_welfare="norm", nhis_any_member_registered="logreg"),
+  list(log_welfare=c(model_pred,"nhis_any_member_registered"),
+       nhis_any_member_registered=c(model_pred,"log_welfare")))
+draws_a <- collect_draws(imp_a, frame_a)
+truth_a <- glss_holdout %>% transmute(hh_key, true_welfare=welfare,
+  true_poor=as.integer(welfare<POV_ABSOLUTE), true_status=as.character(derive_poverty(welfare)),
+  true_nhis=nhis_any_member_registered, region10, urban, household_weight)
+val_a <- draws_a %>% inner_join(truth_a, by="hh_key") %>%
+  rename(household_weight=household_weight.x) %>% select(-household_weight.y)
+holdout_synth <- val_a
+
+per_imp <- val_a %>% group_by(.imp) %>% summarise(
+  synth_welfare_mean_w=w_mean(synth_welfare,household_weight),
+  true_welfare_mean_w=w_mean(true_welfare,household_weight),
+  synth_poverty_rate_w=100*w_mean(synth_poor,household_weight),
+  true_poverty_rate_w=100*w_mean(true_poor,household_weight),
+  mae_log=mean(abs(synth_log_welfare-log(true_welfare)),na.rm=TRUE),
+  rmse_log=sqrt(mean((synth_log_welfare-log(true_welfare))^2,na.rm=TRUE)),
+  corr_log=cor(synth_log_welfare,log(true_welfare),use="complete.obs"),
+  spearman=cor(synth_welfare,true_welfare,method="spearman",use="complete.obs"),
+  poverty3_accuracy=mean(synth_poverty_status==true_status,na.rm=TRUE),
+  nhis_synth_rate_w=100*w_mean(synth_nhis,household_weight),
+  nhis_true_rate_w=100*w_mean(true_nhis,household_weight),
+  nhis_accuracy=mean(synth_nhis==true_nhis,na.rm=TRUE), .groups="drop")
+holdout_validation <- bind_rows(
+  per_imp %>% mutate(.imp=as.character(.imp)),
+  per_imp %>% summarise(across(-.imp, mean)) %>% mutate(.imp="pooled_mean"),
+  per_imp %>% summarise(across(-.imp, sd)) %>% mutate(.imp="between_imp_sd")) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 4))) %>% select(.imp, everything())
+holdout_confusion <- val_a %>% count(true_status, synth_poverty_status) %>%
+  mutate(n = n/M) %>% arrange(true_status, synth_poverty_status)
+subgrp <- function(dat, gvar) dat %>% group_by(.imp, grp=.data[[gvar]]) %>%
+  summarise(sw=100*w_mean(synth_poor,household_weight), tw=100*w_mean(true_poor,household_weight),.groups="drop") %>%
+  group_by(grp) %>% summarise(group_var=gvar, synth_poverty_rate_w=round(mean(sw),2),
+    true_poverty_rate_w=round(mean(tw),2), gap_pp=round(mean(sw-tw),2), .groups="drop")
+holdout_subgroups <- bind_rows(subgrp(val_a,"region10"), subgrp(val_a,"urban"))
+
+## RUN B: DHS enrichment
+frame_b <- build_frame(dhs_households, c("log_welfare","nhis_any_member_registered"))
+imp_b <- run_mice(frame_b, c(log_welfare="norm", nhis_any_member_registered="logreg"),
+  list(log_welfare=c(model_pred,"nhis_any_member_registered"),
+       nhis_any_member_registered=c(model_pred,"log_welfare")))
+draws_b <- collect_draws(imp_b, frame_b)
+dhs_synth <- draws_b %>% left_join(
+  dhs_households %>% select(hh_key, region10, urban, wealth_index,
+                            nhis_observed=nhis_any_member_registered), by="hh_key")
+enrichment_by_imp <- dhs_synth %>% group_by(.imp) %>% summarise(
+  synth_welfare_mean_w=round(w_mean(synth_welfare,household_weight),1),
+  synth_welfare_p50=round(median(synth_welfare,na.rm=TRUE),1),
+  synth_poverty_rate_w=round(100*w_mean(synth_poor,household_weight),2),
+  synth_nhis_rate_w=round(100*w_mean(synth_nhis,household_weight),2),
+  observed_nhis_rate_w=round(100*w_mean(nhis_observed,household_weight),2), .groups="drop")
+dhs_children_synth <- dhs_children %>%
+  inner_join(dhs_synth %>% select(hh_key,.imp,synth_poor), by="hh_key", relationship="many-to-many")
+gradient <- dhs_children_synth %>% group_by(.imp, synth_poor) %>%
+  summarise(stunted_rate=100*w_mean(stunted,child_weight),.groups="drop") %>%
+  group_by(synth_poor) %>% summarise(stunted_rate_pooled=round(mean(stunted_rate),2),
+    between_imp_sd=round(sd(stunted_rate),2),.groups="drop")
+enrichment_summary <- bind_rows(
+  enrichment_by_imp %>% mutate(table="enrichment_by_implicate"),
+  gradient %>% mutate(table="stunting_by_synth_poverty"))
+wealth_benchmark <- dhs_children %>%
+  inner_join(dhs_households %>% select(hh_key, wealth_index), by="hh_key") %>%
+  mutate(low_wealth=as.integer(wealth_index<=2)) %>% group_by(low_wealth) %>%
+  summarise(stunted_rate=round(100*w_mean(stunted,child_weight),2),.groups="drop")
+
+## RUN C: electricity transport check (Validation Check 2)
+frame_c <- build_frame(dhs_households, "has_electricity", extra_cols="has_electricity")
+frame_c$log_welfare <- NULL; frame_c$welfare <- NULL; frame_c$nhis_any_member_registered <- NULL
+imp_c <- run_mice(frame_c, c(has_electricity="logreg"), list(has_electricity=model_pred))
+calib <- bind_rows(lapply(seq_len(M), function(i) {
+  comp <- complete(imp_c,i)
+  frame_c %>% select(hh_key, household_weight, .role, region10) %>%
+    mutate(.imp=i, synth_elec=as.integer(as.character(comp$has_electricity))) %>% filter(.role=="apply")
+})) %>% left_join(dhs_households %>% select(hh_key, true_elec=has_electricity, urban), by="hh_key")
+calib_per_imp <- calib %>% group_by(.imp) %>% summarise(
+  synth_elec_rate_w=round(100*w_mean(synth_elec,household_weight),2),
+  true_elec_rate_w=round(100*w_mean(true_elec,household_weight),2),
+  accuracy=round(mean(synth_elec==true_elec,na.rm=TRUE),4),.groups="drop")
+calib_subgrp <- bind_rows(
+  calib %>% group_by(grp=as.character(region10)) %>% summarise(group_var="region10",
+    synth_rate_w=round(100*w_mean(synth_elec,household_weight),2),
+    true_rate_w=round(100*w_mean(true_elec,household_weight),2),.groups="drop"),
+  calib %>% group_by(grp=as.character(urban)) %>% summarise(group_var="urban",
+    synth_rate_w=round(100*w_mean(synth_elec,household_weight),2),
+    true_rate_w=round(100*w_mean(true_elec,household_weight),2),.groups="drop")) %>%
+  mutate(gap_pp=round(synth_rate_w-true_rate_w,2))
+electricity_calibration <- bind_rows(
+  calib_per_imp %>% mutate(table="by_implicate", grp=NA, group_var=NA,
+    synth_rate_w=synth_elec_rate_w, true_rate_w=true_elec_rate_w) %>%
+    select(table,.imp,group_var,grp,synth_rate_w,true_rate_w,accuracy),
+  calib_subgrp %>% mutate(table="subgroup",.imp=NA, accuracy=NA) %>%
+    select(table,.imp,group_var,grp,synth_rate_w,true_rate_w,accuracy,gap_pp))
+
+model_spec <- data.frame(
+  item=c("data_family","m","maxit","fit_rows_rule","weights_statement","welfare_method",
+         "welfare_transform","nhis_method","poverty_rule","primary_predictors","collinear_dropped_from_model"),
+  value=c(DATA_FAMILY, M, MAXIT,
+    "mice(ignore=): models fit on GLSS train rows only; DHS/holdout rows receive draws",
+    "UNWEIGHTED fitting; household_weight used in all summaries",
+    "norm","log(welfare), back-transformed exp()","logreg",
+    sprintf("derived from drawn welfare at %.2f / %.0f; never drawn", POV_EXTREME, POV_ABSOLUTE),
+    paste(model_pred, collapse="; "),
+    "members_total, adults_15plus, floor_non_earth (exact linear dependencies)"),
+  stringsAsFactors=FALSE)
+logged_events <- bind_rows(lapply(list(A=imp_a,B=imp_b,C=imp_c), function(imp){
+  le<-imp$loggedEvents; if(is.null(le)) return(data.frame(n_events=0L, detail="none"))
+  le %>% count(dep,meth,out,name="n_events") %>% transmute(n_events, detail=paste0(dep," | ",meth," | ",out))
+}) %>% setNames(c("A_holdout","B_enrichment","C_calibration")), .id="run")
+
+cat("imputation complete (m =", M, ")\n")
+```
+
+# Predictor and Target Roles
+
+```{webr-r}
+knitr::kable(manifest %>% count(manifest_role, sort = TRUE))
+```
+
+```{webr-r}
+primary_predictors <- model_spec$value[model_spec$item=="primary_predictors"] %>%
+  strsplit("; ", fixed=TRUE) %>% unlist()
+model_table <- data.frame(
+  design_choice=c("Fitting rows","Weights","Welfare target","NHIS target","Poverty status","Primary predictors"),
+  implementation=c(model_spec$value[model_spec$item=="fit_rows_rule"],
+    model_spec$value[model_spec$item=="weights_statement"],
+    paste(model_spec$value[model_spec$item=="welfare_method"],
+          model_spec$value[model_spec$item=="welfare_transform"], sep="; "),
+    model_spec$value[model_spec$item=="nhis_method"],
+    model_spec$value[model_spec$item=="poverty_rule"],
+    paste(primary_predictors, collapse=", ")))
+knitr::kable(model_table)
+```
+
+Three core columns are dropped from the model (exact linear combinations); kept in the data.
+
+```{webr-r}
+model_spec$value[model_spec$item == "collinear_dropped_from_model"]
+```
+
+# Validation Check 1: GLSS Holdout
+
+Hide welfare in the GLSS holdout and impute it; this is the only check where we know the truth.
+
+```{webr-r}
+knitr::kable(holdout_validation)
+```
+
+The synthetic poverty rate should be near the true rate and stable across imputed datasets. The
+log-welfare correlation is not near one by design.
+
+```{webr-r}
+holdout_plot <- holdout_validation %>% filter(.imp != "between_imp_sd") %>%
+  mutate(.imp = factor(.imp, levels = c(as.character(seq_len(M)), "pooled_mean"))) %>%
+  select(.imp, synth_poverty_rate_w, true_poverty_rate_w) %>%
+  pivot_longer(-.imp, names_to="series", values_to="poverty_rate")
+ggplot(holdout_plot, aes(.imp, poverty_rate, color=series, group=series)) +
+  geom_point(size=2.2) + geom_line() +
+  labs(x="Imputed dataset", y="Weighted poverty rate (%)", color=NULL) + theme_minimal(base_size=12)
+```
+
+```{webr-r}
+truth_density <- holdout_synth %>% distinct(hh_key, true_welfare) %>%
+  mutate(log_welfare=log(true_welfare))
+synth_density <- holdout_synth %>% mutate(log_welfare=synth_log_welfare)
+ggplot() +
+  geom_density(data=synth_density, aes(log_welfare, group=.imp), color="#2f6f73", alpha=0.28, linewidth=0.8) +
+  geom_density(data=truth_density, aes(log_welfare), color="#262626", linewidth=1.2) +
+  labs(x="Log welfare", y="Density") + theme_minimal(base_size=12)
+```
+
+The synthetic and true densities should cover the same range and shape.
+
+```{webr-r}
+holdout_confusion %>% pivot_wider(names_from=synth_poverty_status, values_from=n, values_fill=0) %>%
+  knitr::kable()
+```
+
+Most mass should be on the diagonal; opposite-corner mass is the alarm signal.
+
+```{webr-r}
+holdout_subgroups %>% mutate(across(c(synth_poverty_rate_w,true_poverty_rate_w,gap_pp), ~round(.x,1))) %>%
+  arrange(group_var, grp) %>% knitr::kable()
+```
+
+National fit is not enough — good synthetic data preserves subgroup patterns.
+
+```{webr-r}
+cat("Pooled log-welfare correlation:",
+    round(holdout_validation$corr_log[holdout_validation$.imp=="pooled_mean"],2),
+    "\nSuccess criteria here are distributional and gradient recovery, not one-to-one prediction.\n")
+```
+
+# DHS Transport Check
+
+Hide DHS electricity (a validation target DHS does observe), predict it from GLSS, compare. Tests transport for an observed target — the literature calls this calibration.
+
+```{webr-r}
+electricity_calibration %>% filter(table=="by_implicate") %>%
+  select(.imp, synth_rate_w, true_rate_w, accuracy) %>% knitr::kable()
+```
+
+Stable rates across imputed datasets = small parameter uncertainty; a level gap = imperfect transport.
+
+```{webr-r}
+electricity_calibration %>% filter(table=="subgroup", group_var %in% c("region10","urban")) %>%
+  mutate(gap_pp=round(synth_rate_w-true_rate_w,1)) %>% arrange(group_var, grp) %>% knitr::kable()
+```
+
+The national gap can hide where the model does well or poorly — carry the subgroup gaps forward.
+
+# DHS Enrichment
+
+Impute welfare + NHIS into DHS. Poverty is derived from each drawn welfare, never drawn.
+
+```{webr-r}
+enrichment_summary %>% filter(table=="enrichment_by_implicate") %>%
+  select(.imp, synth_welfare_mean_w, synth_welfare_p50, synth_poverty_rate_w,
+         synth_nhis_rate_w, observed_nhis_rate_w) %>% knitr::kable()
+```
+
+NHIS reproduces the GLSS level (below the DHS level) — the model transports the relationship, gap
+and all.
+
+```{webr-r}
+enrichment_summary %>% filter(table=="enrichment_by_implicate") %>%
+  ggplot(aes(factor(.imp), synth_poverty_rate_w)) + geom_col(fill="#2f6f73") +
+  labs(x="Imputed dataset", y="Weighted synthetic poverty rate (%)") + theme_minimal(base_size=12)
+```
+
+```{webr-r}
+dhs_synth %>% mutate(
+    derived_status=as.character(cut(synth_welfare, c(-Inf,POV_EXTREME,POV_ABSOLUTE,Inf),
+                                    labels=c("Very poor","Poor","Non poor"))),
+    derived_poor=as.integer(synth_welfare < POV_ABSOLUTE)) %>%
+  summarise(rows=n(),
+            status_mismatches=sum(derived_status != synth_poverty_status, na.rm=TRUE),
+            poor_mismatches=sum(derived_poor != synth_poor, na.rm=TRUE)) %>% knitr::kable()
+```
+
+Zero mismatches is the target: poverty is a deterministic consequence of each drawn welfare.
+
+# Child Outcomes by Imputed Poverty
+
+```{webr-r}
+data.frame(rows=nrow(dhs_children_synth),
+           imputed_datasets=length(unique(dhs_children_synth$.imp)),
+           child_rows_per_imputed_dataset=nrow(dhs_children_synth)/length(unique(dhs_children_synth$.imp)),
+           unique_child_ids=length(unique(dhs_children_synth$child_id))) %>% knitr::kable()
+```
+
+```{webr-r}
+stunting_pooled <- dhs_children_synth %>% group_by(.imp, synth_poor) %>%
+  summarise(stunted_rate=100*w_mean(stunted, child_weight), .groups="drop") %>%
+  group_by(synth_poor) %>% summarise(between_imp_sd=sd(stunted_rate),
+    stunted_rate=mean(stunted_rate), .groups="drop") %>%
+  mutate(group=ifelse(synth_poor==1,"Synthetic poor","Synthetic nonpoor"),
+         across(c(stunted_rate,between_imp_sd), ~round(.x,2))) %>%
+  select(group, stunted_rate, between_imp_sd)
+knitr::kable(stunting_pooled)
+```
+
+```{webr-r}
+wealth_benchmark %>% mutate(group=ifelse(low_wealth==1,
+  "DHS wealth bottom two quintiles","DHS wealth upper three quintiles")) %>%
+  select(group, stunted_rate) %>% knitr::kable()
+```
+
+```{webr-r}
+ggplot(stunting_pooled, aes(group, stunted_rate, fill=group)) +
+  geom_col(width=0.65, show.legend=FALSE) +
+  labs(x=NULL, y="Weighted stunting rate (%)") + theme_minimal(base_size=12)
+```
+
+# Pooling Across Imputed Datasets
+
+Pool the synthetic poor vs nonpoor stunting-rate gap with a Rubin-style combination.
+
+```{webr-r}
+gap_by_imp <- bind_rows(lapply(split(dhs_children_synth, dhs_children_synth$.imp), function(dat) {
+  poor <- dat %>% filter(synth_poor==1); nonpoor <- dat %>% filter(synth_poor==0)
+  pe <- weighted_binary_est(poor$stunted, poor$child_weight)
+  ne <- weighted_binary_est(nonpoor$stunted, nonpoor$child_weight)
+  data.frame(.imp=unique(dat$.imp), gap_pp=100*(pe$estimate-ne$estimate),
+             within_var_pp2=100^2*(pe$var+ne$var))
+}))
+pooled_gap <- pool_scalar(gap_by_imp$gap_pp, gap_by_imp$within_var_pp2) %>%
+  mutate(across(everything(), ~round(.x,3)))
+knitr::kable(gap_by_imp %>% mutate(across(where(is.numeric), ~round(.x,3))))
+knitr::kable(pooled_gap)
+```
+
+# Appendix: Optional Engine Sensitivity
+
+This chunk is visible but not evaluated during the main browser practical. Run it manually, or
+change `eval: false` to `eval: true`, if you want to compare `"norm"`, `"pmm"`, `"cart"`, or `"rf"`.
+
+```{webr-r}
+#| eval: false
+engine <- "pmm"
+run_engine_holdout <- function(engine, n_train=1500, n_holdout=500, m=2, maxit=2) {
+  set.seed(EXTENSION_SEED)
+  use_cols <- c("hh_key","household_weight", model_pred, "welfare")
+  tr_pool <- glss_train %>% select(all_of(use_cols)) %>%
+    filter(if_all(all_of(c(model_pred,"welfare")), ~ !is.na(.x))) %>% arrange(hh_key)
+  ho_pool <- glss_holdout %>% select(all_of(use_cols)) %>%
+    filter(if_all(all_of(c(model_pred,"welfare")), ~ !is.na(.x))) %>% arrange(hh_key)
+  tr <- tr_pool %>% slice_sample(n=min(n_train,nrow(tr_pool))) %>% mutate(.role="train")
+  ho <- ho_pool %>% slice_sample(n=min(n_holdout,nrow(ho_pool))) %>% mutate(.role="holdout")
+  s <- bind_rows(tr,ho) %>% mutate(log_welfare=ifelse(.role=="train",log(welfare),NA_real_))
+  for (v in intersect(model_pred, names(s))) if (is.character(s[[v]])) s[[v]] <- factor(s[[v]])
+  s$region10 <- factor(s$region10)
+  md <- s %>% select(all_of(c(model_pred,"log_welfare")))
+  meth <- make.method(md); meth[] <- ""; meth["log_welfare"] <- engine
+  pm <- make.predictorMatrix(md); pm[,] <- 0; pm["log_welfare", model_pred] <- 1
+  el <- system.time({ imp <- mice(md, m=m, maxit=maxit, method=meth, predictorMatrix=pm,
+    ignore=s$.role=="holdout", seed=EXTENSION_SEED, printFlag=FALSE) })
+  dr <- bind_rows(lapply(seq_len(m), function(i){
+    comp <- complete(imp,i); hi <- s$.role=="holdout"
+    s %>% filter(.role=="holdout") %>% transmute(hh_key, household_weight, .imp=i,
+      synth_log_welfare=comp$log_welfare[hi], synth_welfare=exp(synth_log_welfare),
+      synth_poor=as.integer(synth_welfare<POV_ABSOLUTE), true_welfare=welfare,
+      true_poor=as.integer(welfare<POV_ABSOLUTE)) }))
+  recovery_metrics(dr, engine) %>% mutate(train_rows=nrow(tr), holdout_rows=nrow(ho),
+    runtime_sec=round(el[["elapsed"]],1))
+}
+extension_results <- bind_rows(run_engine_holdout("norm"),
+  if (engine=="norm") NULL else run_engine_holdout(engine)) %>%
+  mutate(across(c(mae_log,rmse_log,corr_log,synth_poverty_rate_w,true_poverty_rate_w), ~round(.x,3)))
+knitr::kable(extension_results)
+```
+
+Lower error / higher correlation = better recovery; the poverty-rate match still matters because
+the policy analysis uses poverty groups.
+
+# Reproducibility
+
+```{webr-r}
+data.frame(item=c("Data family","Number of imputed datasets","Poverty line rule","Imputation","Model log events"),
+  value=c(DATA_FAMILY, M,
+    paste("Derived from imputed welfare at", POV_EXTREME,"and",POV_ABSOLUTE),
+    "Computed live in this browser (WebR)",
+    paste(logged_events$run, logged_events$n_events, logged_events$detail, collapse="; "))) %>%
+  knitr::kable()
+```
+
+```{webr-r}
+sessionInfo()
+```
