@@ -2,16 +2,16 @@
 
 **IndabaX Ghana 2026 tutorial — sponsored by the African Center for Economic Transformation (ACET).**
 
-A hands-on workshop on **two-sample synthetic data enrichment**: using the Ghana Living Standards
+A hands-on workshop on **two-sample synthetic data generation**: using the Ghana Living Standards
 Survey (GLSS6, 2012/13) to synthesize welfare and poverty variables into the Ghana Demographic
-and Health Survey (DHS 2014), then analyzing child-health outcomes by synthetic welfare status.
+and Health Survey (DHS 2014), then analyzing child-health outcomes by synthetic poverty status.
 
 ## What's in this repository
 
 | Item | File |
 |---|---|
-| Theory slides | `part1-synthetic-data-tutorial-theory-indabax-2026.pdf` / `.html` |
-| Practical manual slides | `part2-synthetic-data-tutorial-practical-slides-indabax-2026.pdf` / `.html` — a self-paced manual for the notebook |
+| Theory slides | `part1-synthetic-data-tutorial-theory-indabax-2026.pdf` |
+| Practical manual slides | `part2-synthetic-data-tutorial-practical-slides-indabax-2026.pdf` — a self-paced manual for the notebook |
 | Participant practical notebook | `part2-synthetic-data-tutorial-practical-indabax-2026.Rmd` — runs the whole workflow in-notebook |
 | Plain R script | `part2-synthetic-data-tutorial-practical-script-indabax-2026.R` — same practical code, generated from the notebook for line-by-line use |
 | Interactive WebR app (no R install) | `webr/part2-synthetic-data-tutorial-practical-webr-indabax-2026.html` (source: `.qmd`) — runs R in your browser; fetches the workshop data from a hosted URL |
@@ -49,15 +49,14 @@ version computes in your browser on smaller hosted CSVs generated from the same 
 
 ## The data
 
-The **GLSS6 and DHS 2014 microdata are licensed and are not included in this repository.** To run
-the notebook you need a prepared extract built from those sources:
+The raw **GLSS6 and DHS 2014 microdata are licensed and are not included in this repository.** To prepare you rown 
+raw files for your own projects, contact the following sources:
 
 - **DHS 2014:** register and download from [The DHS Program](https://dhsprogram.com/).
 - **GLSS6:** register and download from the Ghana Statistical Service / World Bank LSMS catalog.
 
 Workshop attendees receive a prepared teaching extract through the Dropbox link below during the
-practical session. The link may be empty or inactive before and after the event; the data will be
-uploaded for the workshop window and removed afterward.
+practical session. The link may be empty or inactive before and after the event. 
 
 **Workshop Dropbox data link:** [Download the workshop data](https://www.dropbox.com/scl/fo/pkiom85yjznl0id9692tn/AGbkZPzFT9Zt9ynIrJnfy2Y?rlkey=8jlbhksqa9o67nwio55ycu1c8&st=8q7577ig&dl=0)
 
