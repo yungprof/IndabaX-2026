@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: llm-assistants-core
+Version: 0.1.0
+Requires-Python: >=3.12
+Requires-Dist: anthropic>=0.40.0
+Requires-Dist: google-genai>=1.0.0
+Requires-Dist: fastapi>=0.115.0
+Requires-Dist: uvicorn[standard]>=0.30.0
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: pandas>=2.0.0
+Requires-Dist: matplotlib>=3.8.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0.0; extra == "dev"
+Requires-Dist: httpx>=0.27.0; extra == "dev"
